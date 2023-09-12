@@ -9,7 +9,8 @@ const wrapper2 = document.createElement('div');
 
 let target,
     start,
-    end;
+    end,
+    dragging = false;
 
 chrome.runtime.onMessage.addListener((msg) => {
     if (msg.id !== 'looop') return;
@@ -108,6 +109,20 @@ okBtn.onclick = () => {
         }
     }
 }
+
+bar.addEventListener('mousedown', () => {
+    dragging = true;
+})
+
+document.addEventListener('mousemove', e => {
+    if (dragging === false) return;
+    bar.style.bottom = `${window.innerHeight - e.y}px`;
+})
+
+document.addEventListener('mouseup', () => {
+    if (dragging === false) return;
+    dragging = false;
+})
 
 function seekStart(e) {
     if (target === undefined) target = e.target;
