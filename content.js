@@ -26,8 +26,8 @@ wrapper2.append(okBtn);
 wrapper2.append(clearBtn);
 
 bar.id = 'looper-extension-bar';
-wrapper1.classList.add('looper-extension-wrapper')
-wrapper2.classList.add('looper-extension-wrapper')
+wrapper1.classList.add('looper-extension-wrapper');
+wrapper2.classList.add('looper-extension-wrapper');
 startBtn.classList.add('looper-extension-button');
 endBtn.classList.add('looper-extension-button');
 okBtn.classList.add('looper-extension-button');
@@ -105,7 +105,7 @@ okBtn.onclick = () => {
         target.addEventListener('timeupdate', onTime);
     } else {
         for (let medium of document.querySelectorAll(['video', 'audio'])) {
-            medium.addEventListener('play', medium.loop = true);
+            medium.addEventListener('play', () => medium.loop = true);
         }
     }
 }

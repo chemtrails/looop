@@ -1,8 +1,8 @@
 {
     "manifest_version": 2,
     "name": "Looop",
-    "version": "0.1",
-    "description": "Loop music and videos",
+    "version": "0.2",
+    "description": "Loop songs and videos",
     "content_scripts": [
         {
             "matches": [
