@@ -6,6 +6,6 @@ chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
         id: 'looop',
         title: 'Looop',
-        contexts: ['page']
+        contexts: ['all']
     });
-})
+});

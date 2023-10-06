@@ -1,42 +1,35 @@
-const bar = document.createElement('div');
-const startBtn = document.createElement('div');
-const endBtn = document.createElement('div');
-const okBtn = document.createElement('div');
-const clearBtn = document.createElement('div');
-const wrapper1 = document.createElement('div');
-const wrapper2 = document.createElement('div');
+const code = `<div id="looper-extension-bar">
+    <div class="looper-extension-wrapper">
+        <span>Loop from</span>
+        <div title="Select loop start" id="looper-extension-start-button" class="looper-extension-button">Start</div>
+        <span>to</span>
+        <div title="Select loop end" id="looper-extension-end-button" class="looper-extension-button">End</div>
+    </div>
+    <div class="looper-extension-wrapper">
+        <div id="looper-extension-apply-button" class="looper-extension-button">Apply</div>
+        <div id="looper-extension-clear-button" class="looper-extension-button">Clear</div>
+    </div>
+</div>`;
 
+document.body.insertAdjacentHTML('beforeend', code);
+
+const bar = document.getElementById('looper-extension-bar');
+const startBtn = document.getElementById('looper-extension-start-button');
+const endBtn = document.getElementById('looper-extension-end-button');
+const okBtn = document.getElementById('looper-extension-apply-button');
+const clearBtn = document.getElementById('looper-extension-clear-button');
 
 let target,
     start,
     end,
-    dragging = false;
+    dragging = false,
+    barHeight;
 
 chrome.runtime.onMessage.addListener((msg) => {
     if (msg.id !== 'looop') return;
     bar.style.display = 'flex';
+    barHeight = bar.getBoundingClientRect().height;
 });
-
-document.body.append(bar);
-bar.append(wrapper1);
-bar.append(wrapper2);
-wrapper1.append(startBtn);
-wrapper1.append(endBtn);
-wrapper2.append(okBtn);
-wrapper2.append(clearBtn);
-
-bar.id = 'looper-extension-bar';
-wrapper1.classList.add('looper-extension-wrapper');
-wrapper2.classList.add('looper-extension-wrapper');
-startBtn.classList.add('looper-extension-button');
-endBtn.classList.add('looper-extension-button');
-okBtn.classList.add('looper-extension-button');
-clearBtn.classList.add('looper-extension-button');
-
-startBtn.textContent = 'Loop start: 0';
-endBtn.textContent = 'Loop end: MAX';
-okBtn.textContent = 'Apply';
-clearBtn.textContent = 'Clear';
 
 clearBtn.onclick = () => {
     if (target !== undefined) {
@@ -52,8 +45,8 @@ clearBtn.onclick = () => {
         target = undefined;
     }
 
-    startBtn.textContent = 'Loop start: 0';
-    endBtn.textContent = 'Loop end: MAX';
+    startBtn.textContent = 'Start';
+    endBtn.textContent = 'End';
     endBtn.classList.remove('looper-extension-selected');
     startBtn.classList.remove('looper-extension-selected');
     bar.style.display = 'none';
@@ -93,6 +86,7 @@ okBtn.onclick = () => {
     endBtn.classList.remove('looper-extension-selected');
     startBtn.classList.remove('looper-extension-selected');
     bar.style.display = 'none';
+    if (start >= end) return;
 
     if (target !== undefined) {
         target.loop = true;
@@ -110,16 +104,24 @@ okBtn.onclick = () => {
     }
 }
 
-bar.addEventListener('mousedown', () => {
+bar.addEventListener('pointerdown', () => {
     dragging = true;
 })
 
-document.addEventListener('mousemove', e => {
+document.addEventListener('pointermove', e => {
     if (dragging === false) return;
-    bar.style.bottom = `${window.innerHeight - e.y}px`;
+    let offset = window.innerHeight - e.y - barHeight;
+
+    if (offset <= 0) {
+        offset = 0
+    } else if (e.y <= 0) {
+        offset = window.innerHeight - barHeight;
+    }
+
+    bar.style.bottom = `${offset}px`;
 })
 
-document.addEventListener('mouseup', () => {
+document.addEventListener('pointerup', () => {
     if (dragging === false) return;
     dragging = false;
 })
@@ -127,13 +129,17 @@ document.addEventListener('mouseup', () => {
 function seekStart(e) {
     if (target === undefined) target = e.target;
     start = target.currentTime;
-    startBtn.textContent = `Loop start: ${parseInt(start)}s`;
+    let ct = new Date(start * 1000).toISOString().slice(11, 19);
+    if (ct.startsWith('00:')) ct = ct.replace('00:', '');
+    startBtn.textContent = `${ct}`;
 }
 
 function seekEnd(e) {
     if (target === undefined) target = e.target;
     end = target.currentTime;
-    endBtn.textContent = `Loop end: ${parseInt(end)}s`;
+    let ct = new Date(end * 1000).toISOString().slice(11, 19);
+    if (ct.startsWith('00:')) ct = ct.replace('00:', '');
+    endBtn.textContent = `${ct}`;
 }
 
 function onTime() {
